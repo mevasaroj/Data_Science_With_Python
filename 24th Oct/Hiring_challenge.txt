@@ -1,0 +1,74 @@
+import pandas as pd
+hc = pd.read_csv('Hiring_Challenge.csv')
+
+hc.describe(include = 'all')
+hc.isnull().sum()
+hc.info# find object type features columns
+
+
+import numpy as np
+hc_1 = hc.replace('?',np.nan)
+
+hc_1 = hc_1.dropna()
+
+# Import label encoder for features only
+from sklearn import preprocessing
+# label_encoder object knows how to understand word labels. 
+label_encoder = preprocessing.LabelEncoder()
+# Encode labels in column 'Country'. 
+#data['Country']= label_encoder.fit_transform(data[‘Country']) 
+#print(data.head())
+
+for i in hc_1.columns:
+    if(hc_1[i].dtype != hc_1['Hired'].dtype):
+        hc_1[i]= label_encoder.fit_transform(hc_1[i]) 
+
+
+#classification type problem
+
+X = hc_1.iloc[:,:-1]# strictly no object/string data
+y = hc_1['Hired']# strictly no object/string data
+
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test = train_test_split(X,y, test_size = 0.2, random_state = 21)
+
+print(X_train.shape)
+print(X_test.shape)
+print(y_train.shape)
+print(y_test.shape)
+
+#various classification algorithm with labeled data
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
+from sklearn import neighbors
+from sklearn.svm import SVC
+
+
+#Training
+#model = LogisticRegression()
+#model = neighbors.KNeighborsClassifier()
+#model = DecisionTreeClassifier()
+model = SVC(kernel='linear',  gamma = 10, C= 1)
+#model = RandomForestClassifier()
+
+
+model.fit(X_train,y_train)
+
+predicted = model.predict(X_test)
+predicted
+
+
+#Accuracy Score
+from sklearn.metrics import accuracy_score
+
+accuracy_score(y_test,predicted)
+
+
+#Confusion Matrix
+print(metrics.confusion_matrix(y_test, predicted))
+
+
+#Classification Report
+print(metrics.classification_report(y_test, predicted))
